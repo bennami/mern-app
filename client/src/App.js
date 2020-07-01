@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import './App.css';
 
@@ -6,8 +6,22 @@ function App() {
 
   const [title, setTitle] = useState();
   const [body, setBody] =useState();
+  const [posts, setPosts] = useState([]);
 
-
+  useEffect(()=>{
+   getBlogPost();
+  },[]);
+  const getBlogPost = ()=>{
+    axios.get('/api')
+        .then((response)=>{
+          const data = response.data;
+          setPosts(data);
+          console.log("data is recieved from backend");
+        })
+        .catch(()=>{
+          alert('error retrieving data');
+        })
+  }
 
 
   const handleChange = (event)=>{
@@ -37,6 +51,7 @@ function App() {
     }).then(()=>{
         console.log('data has been sent');
         resetInputs();
+        getBlogPost();
     }).catch(()=>{
           console.log('internal server error');
         });
@@ -45,6 +60,16 @@ function App() {
   function resetInputs(){
     setBody('');
     setTitle('');
+  }
+  const displayBlogPost = (posts) =>{
+      if(!posts.length)return null;
+     return posts.map((post,i) =>(
+          <div key={i}>
+            <h3>{post.title}</h3>
+            <p>{post.body}</p>
+          </div>
+      ));
+
   }
   return (
     <div className="App">
@@ -69,6 +94,9 @@ function App() {
         </div>
         <button>submit</button>
       </form>
+      <div className="blog">
+        {displayBlogPost(posts)}
+      </div>
     </div>
   );
 }
